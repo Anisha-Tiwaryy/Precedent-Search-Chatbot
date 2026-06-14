@@ -163,6 +163,13 @@
   .anchor-note b{color:var(--ink);font-family:'Spectral',serif}
   .anchor-note .clear{float:right;cursor:pointer;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
   .anchor-note .clear:hover{color:var(--oxblood)}
+  button.backbtn{
+    appearance:none;cursor:pointer;background:var(--ink);color:var(--paper);
+    border:1px solid var(--ink);border-radius:var(--radius);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;
+    padding:9px 16px;transition:background .15s;
+  }
+  button.backbtn:hover{background:var(--oxblood);border-color:var(--oxblood)}
 
   /* ---------- Detail drawer ---------- */
   .scrim{position:fixed;inset:0;background:rgba(28,26,22,.42);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
@@ -201,7 +208,7 @@
 <header class="masthead">
   <div class="wrap">
     <div class="crest">
-      <span class="mark">Nyaya<em>.</em></span>
+      <span class="mark" id="homeLink" title="Back to all judgements" style="cursor:pointer">Nyaya<em>.</em></span>
       <span class="sub">Precedent Search &amp; Retrieval Engine</span>
     </div>
     <p class="tagline">Enter a <b>case name, citation, or legal issue</b> — or open any judgement and ask for <b>similar precedents</b>. Demonstrates keyword, semantic, and hybrid retrieval over a sample of landmark Supreme Court of India judgements.</p>
@@ -231,6 +238,10 @@
   </section>
 
   <div id="anchor"></div>
+
+  <div id="backRow" style="display:none;margin-top:18px">
+    <button class="backbtn" id="backBtn">&larr;&nbsp; All judgements</button>
+  </div>
 
   <div class="meta-line">
     <h2 id="resultTitle">Landmark judgements</h2>
@@ -367,7 +378,14 @@ const HINTS={
 /* ---------- elements ---------- */
 const $=s=>document.querySelector(s);
 const resultsEl=$("#results"), countEl=$("#resultCount"), titleEl=$("#resultTitle"),
-      hintEl=$("#hint"), anchorEl=$("#anchor"), qEl=$("#q"), areaEl=$("#area");
+      hintEl=$("#hint"), anchorEl=$("#anchor"), qEl=$("#q"), areaEl=$("#area"),
+      backRow=$("#backRow");
+
+function goHome(){
+  anchorId=null; anchorEl.innerHTML=""; qEl.value=""; areaEl.value="";
+  setMode("hybrid");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 
 // populate area filter
 [...new Set(CASES.map(c=>c.area))].sort().forEach(a=>{
@@ -385,6 +403,8 @@ function passesArea(c){const a=areaEl.value;return !a||c.area===a;}
 
 function run(){
   const q=qEl.value.trim();
+  // show "back" whenever we're not on the plain default view
+  backRow.style.display = (anchorId || q || areaEl.value) ? "block" : "none";
   if(anchorId){ renderSimilar(); return; }
   let rows;
   if(!q){
@@ -490,6 +510,8 @@ $("#go").onclick=run;
 qEl.addEventListener("input",()=>{if(anchorId){anchorId=null;anchorEl.innerHTML="";}run();});
 qEl.addEventListener("keydown",e=>{if(e.key==="Enter")run();});
 areaEl.onchange=run;
+$("#homeLink").onclick=goHome;
+$("#backBtn").onclick=goHome;
 setMode("hybrid");
 </script>
 </body>
